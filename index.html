@@ -65,9 +65,9 @@
 
         /* Nova 的角色顯示區域 */
         .character-stage {
-            height: 200px; /* 稍微加高以容納圖片 */
+            height: 200px;
             display: flex;
-            align-items: flex-end; /* 讓人物站在馬桶上 */
+            align-items: flex-end;
             justify-content: center;
             margin-bottom: 15px;
             position: relative;
@@ -76,13 +76,11 @@
 
         /* Nova 的圖片 */
         .nova-avatar-img {
-            /* 這裡設定圖片大小，保持比例 */
             height: 180px; 
             width: auto;
             max-width: 100%;
             z-index: 2;
             transition: transform 0.2s;
-            /* 預設表情圖片 - 請確保目錄下有 20260107-142650.jpeg */
         }
 
         /* 馬桶 */
@@ -98,7 +96,6 @@
         .poop-drop {
             position: absolute;
             font-size: 45px;
-            /* 初始位置在屁股附近 */
             top: 55%; 
             left: 50%;
             transform: translateX(-50%);
@@ -221,9 +218,9 @@
     <script>
         // 遊戲狀態變數
         let poopProgress = 0;
-        let badMood = 0; // 0 = 開心, 100 = 生氣/不想大便
+        let badMood = 0; 
         let gameActive = true;
-        const MAX_INCREMENT = 15; // 最大單次增加值
+        const MAX_INCREMENT = 15;
 
         // 獲取 DOM 元素
         const poopBar = document.getElementById('poop-bar');
@@ -232,65 +229,49 @@
         const message = document.getElementById('message');
         const poopDrop = document.getElementById('poop-drop');
 
-        // 工具函數：產生隨機整數 (包含 min 和 max)
         function getRandomInt(min, max) {
             min = Math.ceil(min);
             max = Math.floor(max);
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        // 工具函數：觸發圖片抖動動畫
         function triggerShake() {
-            // 移除 class 以便重新觸發動畫
             novaImg.classList.remove('shake');
-            // 強制瀏覽器重繪 (Reflow)，這是一個小技巧確保動畫能重複播放
             void novaImg.offsetWidth; 
-            // 加上 class 開始動畫
             novaImg.classList.add('shake');
         }
 
-        // 更新畫面函數
         function updateUI() {
             poopBar.style.width = poopProgress + '%';
             moodBar.style.width = badMood + '%';
 
-            // 根據心情改變顏色
             if (badMood < 50) {
-                moodBar.style.backgroundColor = '#4caf50'; // Green (Good)
+                moodBar.style.backgroundColor = '#4caf50'; 
             } else if (badMood < 80) {
-                moodBar.style.backgroundColor = '#ff9800'; // Orange (Warning)
+                moodBar.style.backgroundColor = '#ff9800'; 
             } else {
-                moodBar.style.backgroundColor = '#ff4d4d'; // Red (Bad)
+                moodBar.style.backgroundColor = '#ff4d4d'; 
             }
         }
 
         function checkGameState() {
             if (!gameActive) return;
-
-            // 限制數值範圍在 0-100
             poopProgress = Math.min(Math.max(poopProgress, 0), 100);
             badMood = Math.min(Math.max(badMood, 0), 100);
-
             updateUI();
 
-            // 勝利條件：便便 100%
             if (poopProgress >= 100) {
                 gameWin();
-            } 
-            // 失敗條件：心情差 100%
-            else if (badMood >= 100) {
+            } else if (badMood >= 100) {
                 gameLose();
             }
         }
 
-        // 1. PUSH: 
         function actionPush() {
             if (!gameActive) return;
             triggerShake();
 
-            // 隨機增加便便進度 (例如 5% 到 15%)
             let poopGain = getRandomInt(5, MAX_INCREMENT);
-            // 煩躁指數是便便進度的 1.5 倍
             let moodGain = poopGain * 1.5;
             
             poopProgress += poopGain;
@@ -300,14 +281,11 @@
             checkGameState();
         }
 
-        // 2. DRINK WATER: 
         function actionDrink() {
             if (!gameActive) return;
             triggerShake();
 
-            // 便便增加較少 (例如 1% 到 8%)
             let poopGain = getRandomInt(1, 8);
-            // 心情變好 (例如減少 5% 到 12%)
             let moodLoss = getRandomInt(5, 12);
 
             poopProgress += poopGain;
@@ -317,15 +295,11 @@
             checkGameState();
         }
 
-        // 3. SING A SONG: 
         function actionSing() {
             if (!gameActive) return;
             triggerShake();
 
-            // 不增加便便
-            // 心情大幅變好 (例如減少 8% 到 15%)
             let moodLoss = getRandomInt(8, MAX_INCREMENT);
-
             badMood -= moodLoss;
             
             message.innerText = `La La La ~~~ (好放鬆喔)`;
@@ -336,7 +310,6 @@
             gameActive = false;
             message.innerText = "成功了！Nova 好棒！✨";
             message.style.color = "green";
-            // 便便掉下來動畫
             poopDrop.classList.add('falling');
             disableButtons(true);
         }
@@ -366,7 +339,6 @@
             updateUI();
         }
 
-        // 初始化
         resetGame();
     </script>
 </body>
