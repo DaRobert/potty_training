@@ -3,195 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova's Potty Training Adventure v2</title>
+    <title>Nova's Potty Training Adventure</title>
     <style>
-        /* 引入可愛的字體 */
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
-
         body {
-            font-family: 'Fredoka One', cursive, sans-serif;
-            background-color: #e6f7ff; /* 更柔和的背景色 */
-            background-image: radial-gradient(#ffffff 20%, transparent 20%),
-                              radial-gradient(#ffffff 20%, transparent 20%);
-            background-size: 50px 50px;
-            background-position: 0 0, 25px 25px;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            background-color: #f0f8ff;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            height: 100vh;
             margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
             overflow: hidden;
             text-align: center;
         }
 
-        h1 { color: #ff69b4; margin: 0 0 15px 0; font-size: 28px; text-shadow: 2px 2px 0px #fff; }
+        h1 { color: #ff69b4; margin-bottom: 10px; font-size: 24px; }
 
+        /* 遊戲區域 */
         .game-container {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 25px 20px;
-            border-radius: 30px;
-            box-shadow: 0 15px 35px rgba(100,180,255,0.3);
-            width: 100%;
-            max-width: 420px;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 400px;
             position: relative;
-            border: 5px solid #fff;
         }
 
         /* 進度條區域 */
-        .status-bars { margin-bottom: 20px; }
-        .bar-container { margin: 12px 0; text-align: left; }
-        .label { font-size: 16px; color: #555; margin-bottom: 8px; display: flex; justify-content: space-between; }
-        .label span:last-child { font-size: 14px; color: #999; }
+        .status-bars {
+            margin-bottom: 15px;
+        }
 
+        .bar-container {
+            margin: 8px 0;
+            text-align: left;
+        }
+
+        .label { font-size: 14px; font-weight: bold; margin-bottom: 3px; display: block; }
+        
         .progress-track {
-            background-color: #e0e0e0;
-            border-radius: 15px;
-            height: 22px;
+            background-color: #eee;
+            border-radius: 10px;
+            height: 18px;
             width: 100%;
             overflow: hidden;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
-            border: 3px solid #fff;
+            border: 2px solid #ccc;
+            position: relative;
         }
 
         .progress-fill {
             height: 100%;
             width: 0%;
-            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s;
-            border-radius: 15px;
-            /* 添加條紋效果 */
-            background-image: linear-gradient(45deg, rgba(255,255,255,.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.15) 50%, rgba(255,255,255,.15) 75%, transparent 75%, transparent);
-            background-size: 20px 20px;
+            transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), background-color 0.4s;
         }
 
-        #poop-bar { background-color: #8b4513; }
-        #mood-bar { background-color: #4caf50; }
+        /* 顏色定義 */
+        #poop-bar { background-color: #8b4513; } /* 咖啡色 */
+        #mood-bar { background-color: #4caf50; } /* 初始綠色 */
 
-        /* 角色舞台區 */
+        /* Nova 的角色顯示區域 */
         .character-stage {
-            height: 220px;
+            height: 200px; /* 稍微加高以容納圖片 */
             display: flex;
-            align-items: flex-end; /* 讓角色坐在馬桶上 */
+            align-items: flex-end; /* 讓人物站在馬桶上 */
             justify-content: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             position: relative;
+            overflow: visible;
         }
 
-        /* Nova 的圖片容器 */
-        .nova-avatar {
-            position: relative;
+        /* Nova 的圖片 */
+        .nova-avatar-img {
+            /* 這裡設定圖片大小，保持比例 */
+            height: 180px; 
+            width: auto;
+            max-width: 100%;
             z-index: 2;
             transition: transform 0.2s;
-            /* 預設呼吸動畫，讓靜態圖看起來有動態感 */
-            animation: breathe 3s ease-in-out infinite;
-        }
-
-        /* Nova 的圖片本體 */
-        .nova-avatar img {
-            width: 160px; /* 調整圖片大小 */
-            height: auto;
-            display: block;
-            /* 重要：確保圖片去背乾淨 */
+            /* 預設表情圖片 - 請確保目錄下有 gemini.png */
         }
 
         /* 馬桶 */
         .toilet {
             position: absolute;
-            bottom: 10px;
-            font-size: 100px;
+            bottom: 0px;
+            font-size: 80px;
             z-index: 1;
-            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1));
+            opacity: 0.8;
         }
 
         /* 掉下來的便便 */
         .poop-drop {
             position: absolute;
-            font-size: 50px;
-            top: 50%;
+            font-size: 45px;
+            /* 初始位置在屁股附近 */
+            top: 55%; 
             left: 50%;
             transform: translateX(-50%);
-            z-index: 0;
             opacity: 0;
-            transition: top 0.8s cubic-bezier(0.5, 0.05, 0.1, 0.3), opacity 0.5s;
+            z-index: 3;
         }
-        .poop-drop.falling { opacity: 1; top: 110%; }
 
-        /* 狀態訊息 */
-        #message {
-            min-height: 30px;
-            margin: 5px 0 15px 0;
-            color: #FF9800;
-            font-weight: bold;
-            font-size: 18px;
+        .poop-drop.falling {
+             animation: dropDown 1s forwards;
+        }
+
+        @keyframes dropDown {
+            0% { opacity: 1; top: 55%; }
+            80% { opacity: 1; top: 85%; }
+            100% { opacity: 0; top: 90%; }
         }
 
         /* 按鈕區域 */
         .controls {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 12px;
+            gap: 8px;
         }
 
         button {
             border: none;
-            border-radius: 20px;
-            padding: 15px 5px;
-            font-size: 16px;
-            font-family: 'Fredoka One', cursive, sans-serif;
+            border-radius: 15px;
+            padding: 12px 2px;
+            font-size: 14px;
+            font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.1s, background 0.2s;
             display: flex;
             flex-direction: column;
             align-items: center;
-            box-shadow: 0 6px 0 rgba(0,0,0,0.1);
+            box-shadow: 0 4px 0px rgba(0,0,0,0.1);
             position: relative;
             top: 0;
         }
 
-        button:active { top: 6px; box-shadow: 0 0 0 rgba(0,0,0,0.1); }
-        button:disabled { opacity: 0.6; cursor: not-allowed; filter: grayscale(80%); top: 6px; box-shadow: none; }
+        button:active { transform: translateY(4px); box-shadow: none; }
+        
+        .btn-push { background-color: #ffcccb; color: #8b0000; }
+        .btn-drink { background-color: #e0f7fa; color: #006064; }
+        .btn-sing { background-color: #fff9c4; color: #f57f17; }
 
-        .btn-push { background-color: #ff8a80; color: #fff; } /* 紅色系 */
-        .btn-drink { background-color: #4fc3f7; color: #fff; } /* 藍色系 */
-        .btn-sing { background-color: #ffd54f; color: #fff; } /* 黃色系 */
+        .icon { font-size: 22px; margin-bottom: 3px; }
 
-        .icon { font-size: 28px; margin-bottom: 8px; }
+        /* 動畫 Class */
+        .shake { animation: shake 0.4s; }
 
-        /* --- 動畫定義 --- */
-        /* 呼吸 */
-        @keyframes breathe {
-            0%, 100% { transform: scale(1) translateY(0); }
-            50% { transform: scale(1.03) translateY(-3px); }
-        }
-        /* 用力發抖 */
-        .shake { animation: shake 0.5s infinite; }
         @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            20% { transform: translate(-2px, 0px) rotate(1deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            60% { transform: translate(-2px, 1px) rotate(0deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-        }
-        /* 開心跳動 */
-        .bounce { animation: bounce 0.6s infinite; }
-        @keyframes bounce {
-            0%, 100% {transform: translateY(0) scale(1);}
-            50% {transform: translateY(-15px) scale(1.05);}
+            0% { transform: translate(0px, 0px) rotate(0deg); }
+            20% { transform: translate(-3px, 1px) rotate(-2deg); }
+            40% { transform: translate(3px, -1px) rotate(2deg); }
+            60% { transform: translate(-3px, 0px) rotate(-1deg); }
+            80% { transform: translate(3px, 1px) rotate(1deg); }
+            100% { transform: translate(0px, 0px) rotate(0deg); }
         }
 
-        .reset-btn {
-            width: 100%;
-            margin-top: 25px;
-            background: #90a4ae;
-            color: white;
-            padding: 12px;
-            border-radius: 15px;
-            border: none;
-            font-family: inherit;
-            font-size: 16px;
-            cursor: pointer;
+        /* 狀態訊息 */
+        #message {
+            height: 25px;
+            margin-top: 10px;
+            color: #555;
+            font-weight: bold;
+            font-size: 15px;
         }
 
     </style>
@@ -199,23 +173,17 @@
 <body>
 
     <div class="game-container">
-        <h1>✨ Nova's Potty Time ✨</h1>
+        <h1>Nova's Potty Time</h1>
 
         <div class="status-bars">
             <div class="bar-container">
-                <div class="label">
-                    <span>💩 便便進度 (Poop Progress)</span>
-                    <span id="poop-val">0%</span>
-                </div>
+                <span class="label">💩 Poop Progress (便便進度)</span>
                 <div class="progress-track">
                     <div class="progress-fill" id="poop-bar"></div>
                 </div>
             </div>
             <div class="bar-container">
-                <div class="label">
-                    <span>😡 煩躁指數 (Bad Mood)</span>
-                    <span id="mood-val">0%</span>
-                </div>
+                <span class="label">😡 Frustration (煩躁指數)</span>
                 <div class="progress-track">
                     <div class="progress-fill" id="mood-bar"></div>
                 </div>
@@ -223,206 +191,183 @@
         </div>
 
         <div class="character-stage">
+            <img src="gemini.png" alt="Nova" class="nova-avatar-img" id="nova-img">
             <div class="poop-drop" id="poop-drop">💩</div>
             <div class="toilet">🚽</div>
-            <div class="nova-avatar" id="nova-container">
-                <img id="nova-img" src="https://via.placeholder.com/160x160/e6f7ff/ff69b4?text=Nova+Idle" alt="Nova Idle">
-            </div>
         </div>
 
-        <div id="message">準備好了嗎？</div>
+        <div id="message">準備好了嗎？Nova?</div>
 
-        <div class="controls" id="control-buttons">
-            <button class="btn-push" onclick="actionPush()">
+        <div class="controls">
+            <button class="btn-push" id="btn-push" onclick="actionPush()">
                 <span class="icon">😣</span>
                 PUSH (用力)
             </button>
-            <button class="btn-drink" onclick="actionDrink()">
+            <button class="btn-drink" id="btn-drink" onclick="actionDrink()">
                 <span class="icon">🥤</span>
                 DRINK (喝水)
             </button>
-            <button class="btn-sing" onclick="actionSing()">
+            <button class="btn-sing" id="btn-sing" onclick="actionSing()">
                 <span class="icon">🎵</span>
                 SING (唱歌)
             </button>
         </div>
         
-        <button class="reset-btn" onclick="resetGame()" style="display:none;" id="reset-btn">再來一次 (Play Again)</button>
+        <div style="margin-top:15px;">
+            <button onclick="resetGame()" style="width:100%; background:#ddd; padding: 10px; flex-direction: row; justify-content: center;">🔄 再玩一次</button>
+        </div>
     </div>
 
     <script>
-        /* Let's make it dynamic! */
-
-        // 遊戲狀態
+        // 遊戲狀態變數
         let poopProgress = 0;
-        let badMood = 0;
+        let badMood = 0; // 0 = 開心, 100 = 生氣/不想大便
         let gameActive = true;
-        let currentAnimClass = '';
+        const MAX_INCREMENT = 15; // 最大單次增加值
 
-        // DOM 元素
+        // 獲取 DOM 元素
         const poopBar = document.getElementById('poop-bar');
         const moodBar = document.getElementById('mood-bar');
-        const poopVal = document.getElementById('poop-val');
-        const moodVal = document.getElementById('mood-val');
-        const novaContainer = document.getElementById('nova-container');
         const novaImg = document.getElementById('nova-img');
         const message = document.getElementById('message');
         const poopDrop = document.getElementById('poop-drop');
-        const controlButtons = document.getElementById('control-buttons');
-        const resetBtn = document.getElementById('reset-btn');
 
-        // === 圖片來源設定 (請替換這裡的連結) ===
-        const novaImages = {
-            // 普通/等待狀態圖片
-            idle: 'https://via.placeholder.com/160x160/e6f7ff/ff69b4?text=Nova+Idle👧', 
-            // 用力狀態圖片
-            push: 'https://via.placeholder.com/160x160/ffcccb/8b0000?text=Nova+Push😣', 
-            // 開心/喝水/唱歌狀態圖片
-            happy: 'https://via.placeholder.com/160x160/fff9c4/f57f17?text=Nova+Happy😋', 
-            // 生氣/失敗狀態圖片
-            angry: 'https://via.placeholder.com/160x160/ff4d4d/ffffff?text=Nova+Angry😡',
-            // 成功狀態圖片
-            success: 'https://via.placeholder.com/160x160/e6f7ff/ff69b4?text=Nova+Yay!🤩' 
-        };
-
-        // 工具函數：產生 min 到 max 之間的隨機整數
+        // 工具函數：產生隨機整數 (包含 min 和 max)
         function getRandomInt(min, max) {
             min = Math.ceil(min);
             max = Math.floor(max);
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        // 設置角色狀態 (圖片與動畫類別)
-        function setNovaState(imgKey, animClass = '', msg = '') {
-            novaImg.src = novaImages[imgKey];
-            
-            if (currentAnimClass) {
-                novaContainer.classList.remove(currentAnimClass);
-            }
-            if (animClass) {
-                novaContainer.classList.add(animClass);
-                currentAnimClass = animClass;
-            } else {
-                currentAnimClass = '';
-            }
-            
-            if(msg) message.innerText = msg;
+        // 工具函數：觸發圖片抖動動畫
+        function triggerShake() {
+            // 移除 class 以便重新觸發動畫
+            novaImg.classList.remove('shake');
+            // 強制瀏覽器重繪 (Reflow)，這是一個小技巧確保動畫能重複播放
+            void novaImg.offsetWidth; 
+            // 加上 class 開始動畫
+            novaImg.classList.add('shake');
         }
 
-        // 更新介面
+        // 更新畫面函數
         function updateUI() {
-            // 確保數值在 0-100 之間
-            poopProgress = Math.min(100, Math.max(0, poopProgress));
-            badMood = Math.min(100, Math.max(0, badMood));
-
             poopBar.style.width = poopProgress + '%';
             moodBar.style.width = badMood + '%';
-            poopVal.innerText = poopProgress + '%';
-            moodVal.innerText = badMood + '%';
 
-            // 煩躁條顏色變化
-            if (badMood < 50) { moodBar.style.backgroundColor = '#4caf50'; } 
-            else if (badMood < 80) { moodBar.style.backgroundColor = '#ff9800'; } 
-            else { moodBar.style.backgroundColor = '#d32f2f'; }
+            // 根據心情改變顏色
+            if (badMood < 50) {
+                moodBar.style.backgroundColor = '#4caf50'; // Green (Good)
+            } else if (badMood < 80) {
+                moodBar.style.backgroundColor = '#ff9800'; // Orange (Warning)
+            } else {
+                moodBar.style.backgroundColor = '#ff4d4d'; // Red (Bad)
+            }
         }
 
-        // 檢查遊戲結束條件
         function checkGameState() {
             if (!gameActive) return;
 
+            // 限制數值範圍在 0-100
+            poopProgress = Math.min(Math.max(poopProgress, 0), 100);
+            badMood = Math.min(Math.max(badMood, 0), 100);
+
+            updateUI();
+
+            // 勝利條件：便便 100%
             if (poopProgress >= 100) {
                 gameWin();
-            } else if (badMood >= 100) {
+            } 
+            // 失敗條件：心情差 100%
+            else if (badMood >= 100) {
                 gameLose();
-            } else {
-                updateUI();
             }
         }
 
-        // 暫時的狀態效果 (動作後自動恢復普通狀態)
-        let resetTimer;
-        function tempState(imgKey, animClass, msg) {
-            clearTimeout(resetTimer); // 清除之前的計時器
-            setNovaState(imgKey, animClass, msg);
-            
-            // 1秒後恢復 Idle 狀態，除非遊戲結束
-            resetTimer = setTimeout(() => {
-                if (gameActive) {
-                    setNovaState('idle', '', 'Nova 加油!');
-                }
-            }, 1000);
-        }
-
-        // --- 動作按鈕 ---
-
-        // 1. PUSH: 大幅增加便便，大幅增加煩躁 (隨機 8-15%)
+        // 1. PUSH: 
         function actionPush() {
             if (!gameActive) return;
-            let pGain = getRandomInt(8, 15);
-            let mGain = getRandomInt(8, 15);
-            poopProgress += pGain;
-            badMood += mGain;
-            tempState('push', 'shake', `恩~~~~! (便便+${pGain}%, 煩躁+${mGain}%)`);
+            triggerShake();
+
+            // 隨機增加便便進度 (例如 5% 到 15%)
+            let poopGain = getRandomInt(5, MAX_INCREMENT);
+            // 煩躁指數是便便進度的 1.5 倍
+            let moodGain = poopGain * 1.5;
+            
+            poopProgress += poopGain;
+            badMood += moodGain;
+            
+            message.innerText = `恩~~~~!! (便便+${poopGain}%, 煩躁+${moodGain.toFixed(1)}%)`;
             checkGameState();
         }
 
-        // 2. DRINK: 少量增加便便 (隨機 3-8%)，中等降低煩躁 (隨機 5-12%)
+        // 2. DRINK WATER: 
         function actionDrink() {
             if (!gameActive) return;
-            let pGain = getRandomInt(3, 8);
-            let mDrop = getRandomInt(5, 12);
-            poopProgress += pGain;
-            badMood -= mDrop;
-            tempState('happy', 'bounce', `咕嚕咕嚕! (便便+${pGain}%, 心情變好)`);
+            triggerShake();
+
+            // 便便增加較少 (例如 1% 到 8%)
+            let poopGain = getRandomInt(1, 8);
+            // 心情變好 (例如減少 5% 到 12%)
+            let moodLoss = getRandomInt(5, 12);
+
+            poopProgress += poopGain;
+            badMood -= moodLoss;
+            
+            message.innerText = `咕嚕咕嚕，多喝水! (心情變好了)`;
             checkGameState();
         }
 
-        // 3. SING: 不增加便便，大幅降低煩躁 (隨機 10-15%)
+        // 3. SING A SONG: 
         function actionSing() {
             if (!gameActive) return;
-            let mDrop = getRandomInt(10, 15);
-            badMood -= mDrop;
-            tempState('happy', 'bounce', `La La La~ (心情放鬆了!)`);
-            checkGameState();
-        }
+            triggerShake();
 
-        // --- 遊戲結束邏輯 ---
-        function toggleControls(active) {
-            const buttons = controlButtons.getElementsByTagName('button');
-            for (let btn of buttons) { btn.disabled = !active; }
-            resetBtn.style.display = active ? 'none' : 'block';
+            // 不增加便便
+            // 心情大幅變好 (例如減少 8% 到 15%)
+            let moodLoss = getRandomInt(8, MAX_INCREMENT);
+
+            badMood -= moodLoss;
+            
+            message.innerText = `La La La ~~~ (好放鬆喔)`;
+            checkGameState();
         }
 
         function gameWin() {
             gameActive = false;
-            poopProgress = 100;
-            updateUI();
-            setNovaState('success', 'bounce', "太棒了！成功了！✨");
+            message.innerText = "成功了！Nova 好棒！✨";
+            message.style.color = "green";
+            // 便便掉下來動畫
             poopDrop.classList.add('falling');
-            toggleControls(false);
+            disableButtons(true);
         }
 
         function gameLose() {
             gameActive = false;
-            badMood = 100;
-            updateUI();
-            setNovaState('angry', 'shake', "Nova 生氣了，不想上了... 😭");
-            toggleControls(false);
+            message.innerText = "Nova 生氣了，不想大便了... 😭";
+            message.style.color = "red";
+            disableButtons(true);
+        }
+
+        function disableButtons(disabled) {
+            document.getElementById('btn-push').disabled = disabled;
+            document.getElementById('btn-drink').disabled = disabled;
+            document.getElementById('btn-sing').disabled = disabled;
         }
 
         function resetGame() {
             poopProgress = 0;
             badMood = 0;
             gameActive = true;
-            setNovaState('idle', '', '準備好了嗎？');
+            message.innerText = "準備好了嗎？Nova?";
+            message.style.color = "#555";
             poopDrop.classList.remove('falling');
-            toggleControls(true);
+            novaImg.classList.remove('shake');
+            disableButtons(false);
             updateUI();
         }
 
         // 初始化
         resetGame();
-
     </script>
 </body>
 </html>
