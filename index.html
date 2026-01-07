@@ -60,8 +60,8 @@
         }
 
         /* 顏色定義 */
-        #poop-bar { background-color: #8b4513; } /* 咖啡色 */
-        #mood-bar { background-color: #4caf50; } /* 初始綠色 */
+        #poop-bar { background-color: #8b4513; } 
+        #mood-bar { background-color: #4caf50; } 
 
         /* Nova 的角色顯示區域 */
         .character-stage {
@@ -92,7 +92,7 @@
             opacity: 0.8;
         }
 
-        /* 掉下來的便便 */
+        /* 便便 */
         .poop-drop {
             position: absolute;
             font-size: 45px;
@@ -101,16 +101,29 @@
             transform: translateX(-50%);
             opacity: 0;
             z-index: 3;
+            transition: top 0.1s; /* 用於重置 */
         }
 
+        /* 掉落動畫：修改為停留在馬桶裡 (opacity 1) */
         .poop-drop.falling {
-             animation: dropDown 1s forwards;
+             animation: dropDown 0.8s forwards;
         }
 
         @keyframes dropDown {
             0% { opacity: 1; top: 55%; }
-            80% { opacity: 1; top: 85%; }
-            100% { opacity: 0; top: 90%; }
+            60% { opacity: 1; top: 80%; }
+            80% { opacity: 1; top: 75%; } /* 彈一下 */
+            100% { opacity: 1; top: 78%; } /* 停在馬桶裡 */
+        }
+
+        /* 沖水動畫：旋轉並縮小消失 */
+        .poop-drop.flushing {
+            animation: flushSwirl 1.5s forwards;
+        }
+
+        @keyframes flushSwirl {
+            0% { transform: translateX(-50%) rotate(0deg) scale(1); top: 78%; opacity: 1; }
+            100% { transform: translateX(-50%) rotate(720deg) scale(0); top: 90%; opacity: 0; }
         }
 
         /* 按鈕區域 */
@@ -142,11 +155,30 @@
         .btn-drink { background-color: #e0f7fa; color: #006064; }
         .btn-sing { background-color: #fff9c4; color: #f57f17; }
 
+        /* 沖水按鈕樣式 */
+        .btn-flush {
+            background-color: #2196F3;
+            color: white;
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
+            display: none; /* 預設隱藏 */
+            justify-content: center;
+            flex-direction: row;
+            gap: 10px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
         .icon { font-size: 22px; margin-bottom: 3px; }
 
-        /* 動畫 Class */
+        /* 角色抖動動畫 */
         .shake { animation: shake 0.4s; }
-
         @keyframes shake {
             0% { transform: translate(0px, 0px) rotate(0deg); }
             20% { transform: translate(-3px, 1px) rotate(-2deg); }
@@ -163,6 +195,12 @@
             color: #555;
             font-weight: bold;
             font-size: 15px;
+        }
+
+        /* 重新開始按鈕區域 */
+        #restart-area {
+            margin-top: 15px;
+            display: none; /* 預設隱藏 */
         }
 
     </style>
@@ -188,14 +226,14 @@
         </div>
 
         <div class="character-stage">
-            <img src="2026999.jpeg" alt="Nova" class="nova-avatar-img" id="nova-img">
+            <img src="20260107-142650.jpeg" alt="Nova" class="nova-avatar-img" id="nova-img">
             <div class="poop-drop" id="poop-drop">💩</div>
             <div class="toilet">🚽</div>
         </div>
 
         <div id="message">準備好了嗎？Nova?</div>
 
-        <div class="controls">
+        <div class="controls" id="game-controls">
             <button class="btn-push" id="btn-push" onclick="actionPush()">
                 <span class="icon">😣</span>
                 PUSH (用力)
@@ -209,8 +247,12 @@
                 SING (唱歌)
             </button>
         </div>
+
+        <button class="btn-flush" id="btn-flush" onclick="actionFlush()">
+            <span style="font-size: 24px;">🌊</span> FLUSH (沖水)
+        </button>
         
-        <div style="margin-top:15px;">
+        <div id="restart-area">
             <button onclick="resetGame()" style="width:100%; background:#ddd; padding: 10px; flex-direction: row; justify-content: center;">🔄 再玩一次</button>
         </div>
     </div>
@@ -228,6 +270,9 @@
         const novaImg = document.getElementById('nova-img');
         const message = document.getElementById('message');
         const poopDrop = document.getElementById('poop-drop');
+        const gameControls = document.getElementById('game-controls');
+        const btnFlush = document.getElementById('btn-flush');
+        const restartArea = document.getElementById('restart-area');
 
         function getRandomInt(min, max) {
             min = Math.ceil(min);
@@ -308,34 +353,64 @@
 
         function gameWin() {
             gameActive = false;
-            message.innerText = "成功了！Nova 好棒！✨";
+            message.innerText = "便便出來了！快沖水！✨";
             message.style.color = "green";
+            
+            // 便便掉下來並停留
             poopDrop.classList.add('falling');
-            disableButtons(true);
+            
+            // 隱藏操作按鈕，顯示沖水按鈕
+            gameControls.style.display = 'none';
+            btnFlush.style.display = 'flex';
+        }
+
+        function actionFlush() {
+            // 播放沖水動畫
+            poopDrop.classList.add('flushing');
+            
+            message.innerText = "沖乾淨了！Bye Bye Poop!";
+            
+            // 隱藏沖水按鈕
+            btnFlush.style.display = 'none';
+            
+            // 延遲一下顯示重新開始
+            setTimeout(() => {
+                restartArea.style.display = 'block';
+            }, 1000);
         }
 
         function gameLose() {
             gameActive = false;
             message.innerText = "Nova 生氣了，不想大便了... 😭";
             message.style.color = "red";
-            disableButtons(true);
-        }
-
-        function disableButtons(disabled) {
-            document.getElementById('btn-push').disabled = disabled;
-            document.getElementById('btn-drink').disabled = disabled;
-            document.getElementById('btn-sing').disabled = disabled;
+            
+            // 失敗時只顯示重來按鈕
+            gameControls.style.display = 'none';
+            restartArea.style.display = 'block';
         }
 
         function resetGame() {
             poopProgress = 0;
             badMood = 0;
             gameActive = true;
+            
             message.innerText = "準備好了嗎？Nova?";
             message.style.color = "#555";
-            poopDrop.classList.remove('falling');
+            
+            // 重置動畫 Class
+            poopDrop.classList.remove('falling', 'flushing');
             novaImg.classList.remove('shake');
-            disableButtons(false);
+            
+            // 重置按鈕顯示狀態
+            gameControls.style.display = 'grid';
+            btnFlush.style.display = 'none';
+            restartArea.style.display = 'none';
+            
+            // 解鎖按鈕
+            document.getElementById('btn-push').disabled = false;
+            document.getElementById('btn-drink').disabled = false;
+            document.getElementById('btn-sing').disabled = false;
+            
             updateUI();
         }
 
